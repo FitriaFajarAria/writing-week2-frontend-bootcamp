@@ -252,4 +252,67 @@ Redux memberi kita fungsi yang disebut combineReducers yang melakukan dua tugas:
 # Async Actions with Middleware and Thunk
 
 
-Middleware merupakan sebuah alat yang digunakan untuk merubah hasil dari request sebelum masuk menjadi response. Middleware Redux dapat melakukan apa saja saat melihat tindakan yang dikirim: mencatat sesuatu, memodifikasi tindakan, menunda tindakan, melakukan panggilan asinkron, dan banyak lagi. Middleware juga memiliki akses ke dispatch dan getState. Itu berarti kita dapat menulis beberapa logika asinkron di middleware, dan masih memiliki kemampuan untuk berinteraksi dengan toko Redux dengan mengirimkan actions
+1. Middleware merupakan sebuah alat yang digunakan untuk merubah hasil dari request sebelum masuk menjadi response. Middleware Redux dapat melakukan apa saja saat melihat tindakan yang dikirim: mencatat sesuatu, memodifikasi tindakan, menunda tindakan, melakukan panggilan asinkron, dan banyak lagi. Middleware juga memiliki akses ke dispatch dan getState. Itu berarti kita dapat menulis beberapa logika asinkron di middleware, dan masih memiliki kemampuan untuk berinteraksi dengan toko Redux dengan mengirimkan actions. 
+
+
+        import { client } from '../api/client'
+
+        const delayedActionMiddleware = storeAPI => next => action => {
+         if (action.type === 'todos/todoAdded') {
+                setTimeout(() => {
+         // Delay this action by one second
+         next(action)
+         }, 1000)
+        return
+         }
+
+          return next(action)
+        }
+
+        const fetchTodosMiddleware = storeAPI => next => action => {
+         if (action.type === 'todos/fetchTodos') {
+         // Make an API call to fetch todos from the server
+        client.get('todos').then(todos => {
+          // Dispatch an action with the todos we received
+         storeAPI.dispatch({ type: 'todos/todosLoaded', payload: todos })
+        })
+        }
+
+        return next(action)
+        }
+
+2. Thunk adalah konsep pemrograman yang menggunakan fungsi untuk menunda evaluasi/kalkulasi suatu operasi. Redux Thunk adalah middleware yang memungkinkan Anda memanggil pembuat aksi yang mengembalikan fungsi sebagai ganti objek aksi. Fungsi itu menerima metode pengiriman penyimpanan, yang kemudian digunakan untuk mengirim aksi sinkron di dalam isi fungsi setelah operasi asinkron selesai.
+
+        npm install redux-thunk
+        
+### Contoh Penggunaan redux-thunk
+
+
+        import { connect } from 'react-redux';
+        import { addTodo } from '../actions';
+        import NewTodo from '../components/NewTodo';
+
+        const mapDispatchToProps = dispatch => {
+         return {
+                onAddTodo: todo => {
+                dispatch(addTodo(todo));
+             }
+           };
+        };
+
+        export default connect(
+        null,
+        mapDispatchToProps
+        )(NewTodo);
+        
+Aksi ini akan menggunakan Axios untuk mengirim permintaan POST. Selain menerima metode pengiriman dari status, fungsi yang dikembalikan oleh aksi asinkron bersama Redux Thunk juga menerima metode getState dari penyimpanan.
+
+        
+                export const addTodo = ({ title, userId }) => {
+                 return (dispatch, getState) => {
+                        dispatch(addTodoStarted());
+
+                        console.log('current state:', getState());
+
+                        };
+                };
