@@ -305,6 +305,7 @@ Redux memberi kita fungsi yang disebut combineReducers yang melakukan dua tugas:
         mapDispatchToProps
         )(NewTodo);
         
+        
 Aksi ini akan menggunakan Axios untuk mengirim permintaan POST. Selain menerima metode pengiriman dari status, fungsi yang dikembalikan oleh aksi asinkron bersama Redux Thunk juga menerima metode getState dari penyimpanan.
 
         
